@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#5A7480</color>
+    <color name="purple_700">#5A7480</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="colorProgress">#720800</color>
+    <color name="cornflower">#696cff</color>
+    <color name="cerulean_blue_30">#4c006ee9</color>
+    <color name="c5_counter_done">#1E2025</color>
+    <color name="c3">#F5A444</color>
+    <color name="c2_read">#FFFBF7</color>
+
+
+
+
+
+    <color name="c1_drawer_header_bg">#2E8B57</color>
+    <color name="c2_drawer_content">#FFFEFE</color>
+    <color name="c2_drawer_content_selected">#4B2E8B57</color>
+    <color name="c3_read">#FFFFF0</color>
+    <color name="c4_actionbar">#2E8B57</color>
+    <color name="c5_title_page">#2E8B57</color>
+    <color name="c6_status_bar">#01796F</color>
+    <color name="c7_special_author">#8B4513</color>
+    <color name="c8_drawer_header_title">#8B4513</color>
+    <color name="c9_mainTextColor">#1D5C39</color>
+    <color name="gb_icon">#00897B</color>
+    <color name="bg_photo">#72E4E4E4</color>
+
+
+</resources>

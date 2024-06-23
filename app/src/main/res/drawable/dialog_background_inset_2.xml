@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:drawable="@drawable/bg_done_dialog"
+    android:insetLeft="@dimen/_14sdp"
+    android:insetRight="@dimen/_14sdp"
+    tools:ignore="MissingDefaultResource" />
