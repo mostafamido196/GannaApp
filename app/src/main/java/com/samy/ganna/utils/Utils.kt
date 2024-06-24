@@ -74,7 +74,7 @@ object Utils {
     }
 
     public fun myLog( value:String) {
-            Log.d("mos samy", "$value")
+            Log.d("hamoly", "$value")
 
     }
     public fun getTextSizes(context: Context): FontSize {

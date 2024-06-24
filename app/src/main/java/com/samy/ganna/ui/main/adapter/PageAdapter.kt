@@ -57,7 +57,7 @@ class PageAdapter @Inject constructor() :
             data.mainText = data.mainText.replaceArabicNumbers()
             binding.tvIsnad.text = data.description.replaceArabicNumbers()
             onclick(data)
-            initialTextSize()
+//            initialTextSize()
             convertReferenceNums(data)
 
             if (data.id == 0) {
@@ -89,7 +89,7 @@ class PageAdapter @Inject constructor() :
 
             applySpan(
                 str, key, spannableString,
-                SmallPaddingSpan(36, 32, Color.parseColor("#0091EA"))
+                SmallPaddingSpan(binding.root.context,binding.root.context.resources.getDimension(com.intuit.ssp.R.dimen._10ssp), binding.root.context.resources.getDimension(com.intuit.sdp.R.dimen._8sdp), Color.parseColor("#0091EA"))
             )
 
 

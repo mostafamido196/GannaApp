@@ -6,24 +6,24 @@ import android.os.Handler
 import androidx.appcompat.app.AppCompatActivity
 import com.samy.ganna.R
 import com.samy.ganna.ui.main.MainActivity
+import com.samy.ganna.utils.Constants
+import com.samy.ganna.utils.NotificationUtils
 
 class SplashScreenActivity : AppCompatActivity() {
+    var isOpenFromNotification = -1
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash_screen)
+
+        isOpenFromNotification = intent.getIntExtra(NotificationUtils.EXTRA_NOTIFICATION, -1)
+
         Handler().postDelayed({
-            // on below line we are
-            // creating a new intent
             val i = Intent(
                 this,
                 MainActivity::class.java
             )
-            // on below line we are
-            // starting a new activity.
+            i.putExtra(Constants.ISAUTOOPENDNOTIFICATION,isOpenFromNotification)
             startActivity(i)
-
-            // on the below line we are finishing
-            // our current activity.
             finish()
         }, 2000)
     }

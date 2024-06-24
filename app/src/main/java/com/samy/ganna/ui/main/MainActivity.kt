@@ -1,8 +1,7 @@
 package com.samy.ganna.ui.main
 
-import android.content.Intent
+import android.media.MediaPlayer
 import android.os.Bundle
-import android.util.TypedValue
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -14,12 +13,14 @@ import com.samy.ganna.R
 import com.samy.ganna.databinding.ActivityMainBinding
 import com.samy.ganna.pojo.Book
 import com.samy.ganna.pojo.Title
-import com.samy.ganna.ui.setting.SettingActivity
 import com.samy.ganna.ui.main.adapter.PageAdapter
 import com.samy.ganna.ui.main.adapter.TitleAdapter
+import com.samy.ganna.utils.Constants
 import com.samy.ganna.utils.NetworkState
 import com.samy.ganna.utils.Utils
+import com.samy.ganna.utils.Utils.myLog
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.Calendar
 import javax.inject.Inject
 
 
@@ -43,13 +44,26 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
         data()
         observe()
         setup()
         onclick()
         onViewPageCallBack()
-
+        makeNotificationDaily()
         // to make orientation
+        toMakeOrientation(savedInstanceState)
+
+    }
+
+    private fun ifAppOpenedFromNotification() {
+        val getIntExstraFromNotifiacation = intent.getIntExtra(Constants.ISAUTOOPENDNOTIFICATION,-1)
+        if (getIntExstraFromNotifiacation !=-1) {
+            binding.viewpager.currentItem = getIntExstraFromNotifiacation
+        }
+    }
+
+    private fun toMakeOrientation(savedInstanceState: Bundle?) {
         if (savedInstanceState != null) {
             val currentPage = savedInstanceState.getInt("current_page", 0)
             // Ensure this is run after the view has been laid out
@@ -59,6 +73,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun makeNotificationDaily() {
+        // Schedule the notification
+        DailyNotificationWorker.scheduleNextNotification(this)
+    }
 
 
     private fun data() {
@@ -123,6 +141,12 @@ class MainActivity : AppCompatActivity() {
 ////            pringLogsRVMenu("binding.navContent.tv.setOnClickListener")
 //
 //        }
+        binding.title.setOnClickListener {
+           val mediaPlayer = MediaPlayer.create(this, R.raw.notifi)
+
+            // Start playing the sound
+            mediaPlayer.start()
+        }
     }
 
     private fun select(position: Int) {
@@ -203,8 +227,7 @@ class MainActivity : AppCompatActivity() {
     private fun setup() {
         viewPager()
         navContent()
-        initialTextSize()
-//        initialTitleRV()
+//        initialTextSize()
     }
 
     private fun initialTextSize() {
@@ -215,10 +238,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-//    private fun initialTitleRV() {
-//        titles?.get(0)?.selected  = true
-//        lastIndexSelected = 0
-//    }
+
 
     private fun navContent() {
         binding.navContent.rv.adapter = titleAdapter
@@ -248,6 +268,8 @@ class MainActivity : AppCompatActivity() {
                 binding.title.text = data.name
                 binding.navContent.tv.text = data.fancyName
                 pagesAdapter.submitList(data.arr)
+                ifAppOpenedFromNotification()
+
             }
             is List<*> -> {
                 titles = data as List<Title>

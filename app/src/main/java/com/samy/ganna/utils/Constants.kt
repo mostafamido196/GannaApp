@@ -9,5 +9,8 @@ object Constants {
      const val VIBRATION = "VIBRATION"
      const val SOUND = "SOUND"
      const val TRANSACTION = "TRANSACTION"
+     const val ISAUTOOPENDNOTIFICATION = "isAppOpenedNotification"
+     const val GANNA = "Ganna"
+     const val LASTINDEXREAD = "lastIndexRead"
 
 }

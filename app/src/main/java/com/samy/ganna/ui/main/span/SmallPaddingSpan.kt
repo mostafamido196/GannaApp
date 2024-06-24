@@ -1,12 +1,14 @@
 package com.samy.ganna.ui.main.span
+import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.text.style.ReplacementSpan
 import android.graphics.Typeface
 
 class SmallPaddingSpan(
-    private val textSize: Int,
-    private val paddingBottom: Int,
+    private val context: Context,
+    private val textSize: Float,
+    private val paddingBottom: Float,
     private val textColor: Int,
 ) : ReplacementSpan() {
 
@@ -61,7 +63,7 @@ class SmallPaddingSpan(
         paint.typeface = Typeface.create(originalTypeface, Typeface.NORMAL)
 
         // Draw the text with padding bottom
-        canvas.drawText(text, start, end, x, y.toFloat() - paddingBottom, paint)
+        canvas.drawText(text, start, end, x, y.toFloat() - paddingBottom, paint)//paddingBottom
 
         // Reset the paint to its original style
         paint.textSize = originalTextSize
