@@ -12,5 +12,13 @@ object Constants {
      const val ISAUTOOPENDNOTIFICATION = "isAppOpenedNotification"
      const val GANNA = "Ganna"
      const val LASTINDEXREAD = "lastIndexRead"
+     const val TEST = "Test"
+     const val WORKER = "Worker"
+     const val DATA = "Data"
+     const val BUILDNOTIFICATION = "BuildNotification"
+     const val ScheduleTask = "ScheduleTask"
+     const val IsInitialised = "IsInitialised"
+     const val NOTIFICATION = "NOTIFICATION"
+     const val ONCLICK_NOTIFICATION_ID = "ONCLICK_NOTIFICATION_ID"
 
 }

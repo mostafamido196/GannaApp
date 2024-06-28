@@ -12,7 +12,7 @@
 
 
     <TextView
-        android:id="@+id/title"
+        android:id="@+id/bookTitle"
         android:textSize="@dimen/_16ssp"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -38,7 +38,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/title"
+        app:layout_constraintTop_toBottomOf="@id/bookTitle"
         android:layout_height="0dp"
         android:layoutDirection="rtl"
         android:paddingTop="@dimen/_12sdp">

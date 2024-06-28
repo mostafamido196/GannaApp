@@ -53,7 +53,7 @@ class PageAdapter @Inject constructor() :
                 binding.sv.scrollTo(0, 0)
             }
 
-            binding.title.text = data.title.replaceArabicNumbers()
+            binding.bookTitle.text = data.title.replaceArabicNumbers()
             data.mainText = data.mainText.replaceArabicNumbers()
             binding.tvIsnad.text = data.description.replaceArabicNumbers()
             onclick(data)

@@ -3,48 +3,53 @@ package com.samy.ganna.ui.main
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.work.ListenableWorker
+import androidx.work.PeriodicWorkRequest
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import androidx.work.WorkManager
-import com.samy.ganna.utils.Utils.myLog
-import java.util.concurrent.TimeUnit
-import java.util.Calendar
-import androidx.work.OneTimeWorkRequest
+import com.samy.ganna.utils.Constants
 import com.samy.ganna.utils.NotificationUtils
-import com.samy.ganna.utils.NotificationUtils.createNotification
+import com.samy.ganna.utils.Utils.myLog
+import com.samy.ganna.utils.Utils.setSharedPreferencesString
+import java.util.Calendar
+import java.util.concurrent.TimeUnit
 
 
-class DailyNotificationWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
+class DailyNotificationWorker(val context: Context, params: WorkerParameters) :
+    Worker(context, params) {
 
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun doWork(): Result {
-        createNotification(applicationContext,"إقرأ سبباً من أسباب دخول الجنة")
-        scheduleNextNotification(applicationContext)
+        setSharedPreferencesString(
+            context,
+            Constants.TEST,
+            Constants.WORKER,
+            "doWork(): month:${Calendar.getInstance()[Calendar.MONTH]}/day:${Calendar.getInstance()[Calendar.DAY_OF_MONTH]}--> hour:${Calendar.getInstance()[Calendar.HOUR_OF_DAY]}/min:${Calendar.getInstance()[Calendar.MINUTE]}/millisecond:${Calendar.getInstance()[Calendar.MILLISECOND]}"
+        )
+//        myLog("DailyNotificationWorker:doWork()")
+//        myLog("hour:$${Calendar.getInstance()[Calendar.HOUR_OF_DAY]}, min:$${Calendar.getInstance()[Calendar.MINUTE]}")
+//        myLog("-------------------------------------------")
+
+        NotificationUtils.generateNotification(applicationContext, "من أسباب دخول الجنة")
+//        scheduleNextNotification(applicationContext)
         return Result.success()
     }
 
     companion object {
-        var date = ""
         fun scheduleNextNotification(context: Context) {
-            val calendar = Calendar.getInstance().apply {
-                set(Calendar.HOUR_OF_DAY, Calendar.getInstance()[Calendar.HOUR_OF_DAY])
-                set(Calendar.MINUTE, Calendar.getInstance()[Calendar.MINUTE]+1)
-                set(Calendar.SECOND, 0)
-            }
+//            myLog("DailyNotificationWorker:scheduleNextNotification ")
+//            myLog("hour:$${Calendar.getInstance()[Calendar.HOUR_OF_DAY]}, min:$${Calendar.getInstance()[Calendar.MINUTE]}")
+//            myLog("-------------------------------------------")
 
-            var initialDelay = calendar.timeInMillis - System.currentTimeMillis()
-            if (initialDelay < 0) {
-                initialDelay += TimeUnit.DAYS.toMillis(1)
-            }
-
-            val notificationWork = OneTimeWorkRequest.Builder(DailyNotificationWorker::class.java)
-                .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
-                .build()
+            val notificationWork: PeriodicWorkRequest =
+                PeriodicWorkRequestBuilder<DailyNotificationWorker>(1, TimeUnit.HOURS)
+                    .build()
 
             WorkManager.getInstance(context).enqueue(notificationWork)
         }
+
     }
 }
 

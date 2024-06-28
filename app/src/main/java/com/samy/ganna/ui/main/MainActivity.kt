@@ -1,6 +1,6 @@
 package com.samy.ganna.ui.main
 
-import android.media.MediaPlayer
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -17,10 +17,14 @@ import com.samy.ganna.ui.main.adapter.PageAdapter
 import com.samy.ganna.ui.main.adapter.TitleAdapter
 import com.samy.ganna.utils.Constants
 import com.samy.ganna.utils.NetworkState
+import com.samy.ganna.utils.NotificationUtils
 import com.samy.ganna.utils.Utils
+import com.samy.ganna.utils.Utils.getSharedPreferencesBoolean
+import com.samy.ganna.utils.Utils.getSharedPreferencesInt
 import com.samy.ganna.utils.Utils.myLog
+import com.samy.ganna.utils.Utils.setSharedPreferencesBoolean
+import com.samy.ganna.utils.Utils.setSharedPreferencesInt
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.Calendar
 import javax.inject.Inject
 
 
@@ -45,22 +49,30 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        data()
-        observe()
         setup()
-        onclick()
+        data()
         onViewPageCallBack()
+        onclick()
+//        toMakeOrientation(savedInstanceState)
         makeNotificationDaily()
-        // to make orientation
-        toMakeOrientation(savedInstanceState)
+        observe()
 
     }
 
-    private fun ifAppOpenedFromNotification() {
-        val getIntExstraFromNotifiacation = intent.getIntExtra(Constants.ISAUTOOPENDNOTIFICATION,-1)
-        if (getIntExstraFromNotifiacation !=-1) {
-            binding.viewpager.currentItem = getIntExstraFromNotifiacation
-        }
+    private fun showNotificationItem() {
+        closeDrawer()
+        val itemCLicked = intent.getIntExtra(Constants.ISAUTOOPENDNOTIFICATION, -1)
+        binding.viewpager.currentItem = itemCLicked
+        myLog("showNotificationItem: ${itemCLicked}")
+        myLog("showNotificationItem:binding.viewpager.currentItem ${binding.viewpager.currentItem}")
+
+//            getSharedPreferencesInt(
+//            this,
+//            Constants.NOTIFICATION,
+//            Constants.ONCLICK_NOTIFICATION_ID,
+//            -1
+//        )
+//        setSharedPreferencesInt(this, Constants.NOTIFICATION, Constants.ONCLICK_NOTIFICATION_ID, -1)
     }
 
     private fun toMakeOrientation(savedInstanceState: Bundle?) {
@@ -74,8 +86,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun makeNotificationDaily() {
-        // Schedule the notification
-        DailyNotificationWorker.scheduleNextNotification(this)
+        // schedule task
+        val old = getSharedPreferencesBoolean(
+            this,
+            Constants.ScheduleTask,
+            Constants.IsInitialised,
+            false
+        )
+        if (!old) {
+            DailyNotificationWorker.scheduleNextNotification(this)
+            setSharedPreferencesBoolean(this, Constants.ScheduleTask, Constants.IsInitialised, true)
+        }
+
+
     }
 
 
@@ -98,9 +121,9 @@ class MainActivity : AppCompatActivity() {
             // triggered when you select a new page
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-//                statePage = position
-//                myLog("onPageSelected: statePage: $statePage")
-//                pringLogsRVMenu("onPageSelected")
+                myLog("MainActivity: onPageScrollStateChanged binding.viewpager.currentItem: ${binding.viewpager.currentItem}")
+                //                statePage = position
+                //                myLog("onPageSelected: statePage: $position")
 
             }
 
@@ -108,8 +131,8 @@ class MainActivity : AppCompatActivity() {
             // scroll state will be changed
             override fun onPageScrollStateChanged(state: Int) {
                 super.onPageScrollStateChanged(state)
-//                statePage = state
-//                myLog("onPageScrollStateChanged: statePage: $statePage")
+                //                statePage = state
+//                myLog("onPageScrollStateChanged: statePage: $state")
 
 //                pringLogsRVMenu("onPageScrollStateChanged")
             }
@@ -117,35 +140,35 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+
     private fun onclick() {
         titleAdapter.setOnItemClickListener { view, data, position ->
-//            selectItemNavDrower(position)
             binding.viewpager.currentItem = position
             select(position)
         }
         binding.ivMenu.setOnClickListener {
-//            pringLogsRVMenu("binding.ivMenu.setOnClickListener")
-            titles?.get(lastIndexSelected)?.selected = false
-            titles?.get(binding.viewpager.currentItem)?.selected = true
-            titleAdapter.notifyDataSetChanged()
-            if (binding.drawerLayout.isOpen)
-                closeDrawer()
-            else {
-                openNavSideBar()
-            }
+            openNavSideAndSelectItem()
         }
-//        binding.ivSetting.setOnClickListener {
-//            startActivity(Intent(this, SettingActivity::class.java))
-//        }
-//        binding.navContent.tv.setOnClickListener {
-////            pringLogsRVMenu("binding.navContent.tv.setOnClickListener")
 //
+//        binding.bookTitle.setOnClickListener {
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                myLog("binding.title.setOnClickListener")
+//                NotificationUtils.generateNotification(this, "testMainActivity")
+//
+//
+//            }
 //        }
-        binding.title.setOnClickListener {
-           val mediaPlayer = MediaPlayer.create(this, R.raw.notifi)
 
-            // Start playing the sound
-            mediaPlayer.start()
+    }
+
+    private fun openNavSideAndSelectItem() {
+        titles?.get(lastIndexSelected)?.selected = false
+        titles?.get(binding.viewpager.currentItem)?.selected = true
+        titleAdapter.notifyDataSetChanged()
+        if (binding.drawerLayout.isOpen)
+            closeDrawer()
+        else {
+            openNavSideBar()
         }
     }
 
@@ -157,30 +180,25 @@ class MainActivity : AppCompatActivity() {
         closeDrawer()
     }
 
-//    private fun manageVisPosition(position: Int): Int {
-//        val firstVisibleItemPosition =
-//            (binding.navContent.rv.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-//        return position - firstVisibleItemPosition
-//
-//    }
-
 
     private fun observe() {
         lifecycleScope.launchWhenStarted {
-
             viewModel.bookStateFlow.collect {
 //                myLog("viewModel.bookStateFlow.collect ")
                 when (it) {
                     is NetworkState.Idle -> {
                         return@collect
                     }
+
                     is NetworkState.Loading -> {
 //                        visProgress(true)
                     }
+
                     is NetworkState.Error -> {
 //                        visProgress(false)
 //                        it.handleErrors(mContext, null)
                     }
+
                     is NetworkState.Result<*> -> {
 //                        visProgress(false)
                         handleResult(it.response as Book)
@@ -189,11 +207,8 @@ class MainActivity : AppCompatActivity() {
                 }
 
             }
-
-
         }
         lifecycleScope.launchWhenStarted {
-
 
             viewModel.titleStateFlow.collect {
 //                myLog("viewModel.titleStateFlow.collect ")
@@ -202,15 +217,18 @@ class MainActivity : AppCompatActivity() {
                         return@collect
 //                        myLog("viewModel.titleStateFlow.collect: NetworkState.Idle ")
                     }
+
                     is NetworkState.Loading -> {
 //                        visProgress(true)
 //                        myLog("viewModel.titleStateFlow.collect: NetworkState.Loading ")
                     }
+
                     is NetworkState.Error -> {
 //                        visProgress(false)
 //                        it.handleErrors(mContext, null)
 //                        myLog("viewModel.titleStateFlow.collect: NetworkState.Error ")
                     }
+
                     is NetworkState.Result<*> -> {
 //                        visProgress(false)
                         handleResult(it.response as List<*>)//List<Title>
@@ -225,19 +243,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setup() {
-        viewPager()
         navContent()
-//        initialTextSize()
+        viewPager()
     }
-
-    private fun initialTextSize() {
-        val fontSize = Utils.getTextSizes(this)
-
-//        binding.title.setTextSize(TypedValue.COMPLEX_UNIT_SP, high)
-//        binding.tvAbout.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize.median)
-    }
-
-
 
 
     private fun navContent() {
@@ -256,6 +264,7 @@ class MainActivity : AppCompatActivity() {
             is Book -> {
                 ui(data)
             }
+
             is List<*> -> {//List<Title>
                 ui(data)
             }
@@ -265,56 +274,82 @@ class MainActivity : AppCompatActivity() {
     private fun ui(data: Any) {
         when (data) {
             is Book -> {
-                binding.title.text = data.name
+                binding.bookTitle.text = data.name
                 binding.navContent.tv.text = data.fancyName
                 pagesAdapter.submitList(data.arr)
-                ifAppOpenedFromNotification()
-
+                initialStateViewPager()
             }
-            is List<*> -> {
+
+            is List<*> -> { // list of titles
                 titles = data as List<Title>
                 titleAdapter.submitList(titles)
+                initialNavSideBar()
             }
-        }
 
+        }
+    }
+
+    private fun openNavSideAndSelectIntro() {
+        myLog("openNavSideAndSelectIntro()")
+        lastIndexSelected = 0
+        titles?.get(0)?.selected = true
+        titleAdapter.notifyDataSetChanged()
+        binding.drawerLayout.openDrawer(GravityCompat.START)
+
+    }
+
+
+    private fun initialNavSideBar() {
+        if (!ifAppOpenedFromNotification()) {
+            openNavSideAndSelectIntro()
+        }
+    }
+
+
+    private fun initialStateViewPager() {
+        myLog("initialStateViewPager()")
+        myLog("!ifAppOpenedFromNotification(): ${!ifAppOpenedFromNotification()}")
+        if (ifAppOpenedFromNotification())
+            showNotificationItem()
+
+    }
+
+
+    private fun ifAppOpenedFromNotification(): Boolean {
+        val getIntExstraFromNotifiacation =
+            intent.getIntExtra(Constants.ISAUTOOPENDNOTIFICATION, -1)
+        myLog("MainActivity:ifAppOpenedFromNotification: getIntExstraFromNotifiacation:${getIntExstraFromNotifiacation} ")
+        return getIntExstraFromNotifiacation != -1
     }
 
     // orientation
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-//        myLog("Saved current page: ${binding.viewpager.currentItem}")
-        outState.putInt("current_page", binding.viewpager.currentItem)
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        val currentPage = savedInstanceState.getInt("current_page", 0)
-        binding.viewpager.post {
-            binding.viewpager.setCurrentItem(currentPage, false)
-//            myLog("Restored current page: $currentPage")
-        }
-    }
-
-
-//    private fun selectItemNavDrower(position: Int) {
-//        deselect()
-//        lastIndexSelected = position
-//        select()
+//    override fun onSaveInstanceState(outState: Bundle) {
+//        super.onSaveInstanceState(outState)
+//        outState.putInt("current_page", binding.viewpager.currentItem)
+//    }
+//
+//    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+//        super.onRestoreInstanceState(savedInstanceState)
+//        val currentPage = savedInstanceState.getInt("current_page", 0)
+//        binding.viewpager.post {
+//            binding.viewpager.setCurrentItem(currentPage, false)
+//        }
 //    }
 
-    var indexOfCurrentPage: Int = 0 //when the phone power off then power on
-    override fun onResume() {
-        super.onResume()
-        binding.viewpager.currentItem =
-            indexOfCurrentPage //when the phone power off then power on
 
-    }
-
-    override fun onPause() {
-        super.onPause()
-        indexOfCurrentPage =
-            binding.viewpager.currentItem //when the phone power off then power on
-    }
+//    var indexOfCurrentPage: Int = 0 //when the phone power off then power on
+//    override fun onResume() {
+//        super.onResume()
+//        binding.viewpager.currentItem =
+//            indexOfCurrentPage //when the phone power off then power on
+//
+//    }
+//
+//    override fun onPause() {
+//        super.onPause()
+//        indexOfCurrentPage =
+//            binding.viewpager.currentItem //when the phone power off then power on
+//    }
 
 
     private fun closeDrawer() {
@@ -329,7 +364,6 @@ class MainActivity : AppCompatActivity() {
         scrollToPosition(binding.viewpager.currentItem)
         lastIndexSelected = binding.viewpager.currentItem
     }
-
 
 
     private fun scrollToPosition(position: Int) {

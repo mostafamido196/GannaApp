@@ -29,6 +29,7 @@
     <color name="c7_special_author">#8B4513</color>
     <color name="c8_drawer_header_title">#8B4513</color>
     <color name="c9_mainTextColor">#1D5C39</color>
+    <color name="c10_titleNotificationTextColor">#2B8855</color>
     <color name="gb_icon">#00897B</color>
     <color name="bg_photo">#72E4E4E4</color>
 
