@@ -1,9 +1,16 @@
 package com.samy.ganna.ui.main
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
@@ -16,6 +23,7 @@ import com.samy.ganna.pojo.Title
 import com.samy.ganna.ui.main.adapter.PageAdapter
 import com.samy.ganna.ui.main.adapter.TitleAdapter
 import com.samy.ganna.utils.Constants
+import com.samy.ganna.utils.Constants.NOTIFICATION_PERMISSION_REQUEST_CODE
 import com.samy.ganna.utils.NetworkState
 import com.samy.ganna.utils.NotificationUtils
 import com.samy.ganna.utils.Utils
@@ -53,7 +61,6 @@ class MainActivity : AppCompatActivity() {
         data()
         onViewPageCallBack()
         onclick()
-//        toMakeOrientation(savedInstanceState)
         makeNotificationDaily()
         observe()
 
@@ -63,42 +70,60 @@ class MainActivity : AppCompatActivity() {
         closeDrawer()
         val itemCLicked = intent.getIntExtra(Constants.ISAUTOOPENDNOTIFICATION, -1)
         binding.viewpager.currentItem = itemCLicked
-        myLog("showNotificationItem: ${itemCLicked}")
-        myLog("showNotificationItem:binding.viewpager.currentItem ${binding.viewpager.currentItem}")
-
-//            getSharedPreferencesInt(
-//            this,
-//            Constants.NOTIFICATION,
-//            Constants.ONCLICK_NOTIFICATION_ID,
-//            -1
-//        )
-//        setSharedPreferencesInt(this, Constants.NOTIFICATION, Constants.ONCLICK_NOTIFICATION_ID, -1)
     }
 
-    private fun toMakeOrientation(savedInstanceState: Bundle?) {
-        if (savedInstanceState != null) {
-            val currentPage = savedInstanceState.getInt("current_page", 0)
-            // Ensure this is run after the view has been laid out
-            binding.viewpager.post {
-                binding.viewpager.setCurrentItem(currentPage, false)
-            }
+
+    private fun makeNotificationDaily() {
+        myLog("makeNotificationDaily")
+        sendRunTimePermission()
+    }
+
+    private fun sendRunTimePermission() {
+        myLog("sendRunTimePermission")
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//            if (ActivityCompat.checkSelfPermission(
+//                    this,
+//                    Manifest.permission.POST_NOTIFICATIONS
+//                ) != PackageManager.PERMISSION_GRANTED
+//            ) {
+//                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+//            } else {
+//                // Permission already granted, show the notification
+//                scheduleNotification()
+//            }
+//        } else {
+        // Android version is lower than 13, no need to request permission
+        scheduleNotification()
+//        }
+    }
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        myLog("registerForActivityResult")
+        myLog("isGranted: $isGranted")
+        if (isGranted) {
+            scheduleNotification()
+            Toast.makeText(this, "Notifications permission granted", Toast.LENGTH_SHORT)
+                .show()
+        } else {
+            Toast.makeText(this, "Notification permission denied", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun makeNotificationDaily() {
-        // schedule task
+    private fun scheduleNotification() {
+        myLog("scheduleNotification")
         val old = getSharedPreferencesBoolean(
             this,
             Constants.ScheduleTask,
             Constants.IsInitialised,
             false
         )
+        myLog("old: $old")
         if (!old) {
             DailyNotificationWorker.scheduleNextNotification(this)
             setSharedPreferencesBoolean(this, Constants.ScheduleTask, Constants.IsInitialised, true)
         }
-
-
     }
 
 
@@ -121,7 +146,7 @@ class MainActivity : AppCompatActivity() {
             // triggered when you select a new page
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                myLog("MainActivity: onPageScrollStateChanged binding.viewpager.currentItem: ${binding.viewpager.currentItem}")
+//                myLog("MainActivity: onPageScrollStateChanged binding.viewpager.currentItem: ${binding.viewpager.currentItem}")
                 //                statePage = position
                 //                myLog("onPageSelected: statePage: $position")
 
@@ -290,7 +315,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun openNavSideAndSelectIntro() {
-        myLog("openNavSideAndSelectIntro()")
+//        myLog("openNavSideAndSelectIntro()")
         lastIndexSelected = 0
         titles?.get(0)?.selected = true
         titleAdapter.notifyDataSetChanged()
@@ -307,8 +332,8 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun initialStateViewPager() {
-        myLog("initialStateViewPager()")
-        myLog("!ifAppOpenedFromNotification(): ${!ifAppOpenedFromNotification()}")
+//        myLog("initialStateViewPager()")
+//        myLog("!ifAppOpenedFromNotification(): ${!ifAppOpenedFromNotification()}")
         if (ifAppOpenedFromNotification())
             showNotificationItem()
 
@@ -318,7 +343,7 @@ class MainActivity : AppCompatActivity() {
     private fun ifAppOpenedFromNotification(): Boolean {
         val getIntExstraFromNotifiacation =
             intent.getIntExtra(Constants.ISAUTOOPENDNOTIFICATION, -1)
-        myLog("MainActivity:ifAppOpenedFromNotification: getIntExstraFromNotifiacation:${getIntExstraFromNotifiacation} ")
+//        myLog("MainActivity:ifAppOpenedFromNotification: getIntExstraFromNotifiacation:${getIntExstraFromNotifiacation} ")
         return getIntExstraFromNotifiacation != -1
     }
 

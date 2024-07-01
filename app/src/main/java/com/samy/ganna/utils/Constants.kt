@@ -20,5 +20,7 @@ object Constants {
      const val IsInitialised = "IsInitialised"
      const val NOTIFICATION = "NOTIFICATION"
      const val ONCLICK_NOTIFICATION_ID = "ONCLICK_NOTIFICATION_ID"
+     const val NOTIFICATION_PERMISSION_REQUEST_CODE = 111
+     const val IsNotificationTurnedOn = "IsNotificationTurnedOn"
 
 }

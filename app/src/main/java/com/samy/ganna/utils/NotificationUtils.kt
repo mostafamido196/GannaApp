@@ -1,6 +1,7 @@
 package com.samy.ganna.utils
 
 import android.Manifest
+import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -26,6 +27,8 @@ object NotificationUtils {
     private const val CHANNEL_ID = "daily_notification_channel"
     private const val CHANNEL_NAME = "Advice"
     private const val NOTIFICATION_ID = 500
+    const val NOTIFICATION_PERMISSION_REQUEST_CODE = 111
+
     const val EXTRA_NOTIFICATION = "com.example.EXTRA_NOTIFICATION"
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -91,6 +94,8 @@ object NotificationUtils {
             // notificationId is a unique int for each notification that you must define.
             notify(NOTIFICATION_ID, builder.build())
         }
+
+
     }
 
     private fun prepareCustomView(context: Context, s: String, getPageTitle: String): RemoteViews? {
