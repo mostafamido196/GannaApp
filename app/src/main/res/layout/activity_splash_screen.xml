@@ -54,7 +54,7 @@
         android:layout_height="wrap_content"
         android:text="لفضيلة الشيخ الدكتور"
         android:textColor="@color/white"
-        android:textSize="@dimen/_20sdp"
+        android:textSize="@dimen/_20ssp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_book"
         app:layout_constraintStart_toStartOf="parent" />

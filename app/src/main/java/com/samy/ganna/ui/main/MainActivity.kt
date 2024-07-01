@@ -80,21 +80,21 @@ class MainActivity : AppCompatActivity() {
 
     private fun sendRunTimePermission() {
         myLog("sendRunTimePermission")
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-//            if (ActivityCompat.checkSelfPermission(
-//                    this,
-//                    Manifest.permission.POST_NOTIFICATIONS
-//                ) != PackageManager.PERMISSION_GRANTED
-//            ) {
-//                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-//            } else {
-//                // Permission already granted, show the notification
-//                scheduleNotification()
-//            }
-//        } else {
-        // Android version is lower than 13, no need to request permission
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                // Permission already granted, show the notification
+                scheduleNotification()
+            }
+        } else {
+            // Android version is lower than 13, no need to request permission
         scheduleNotification()
-//        }
+        }
     }
 
     private val requestPermissionLauncher = registerForActivityResult(
