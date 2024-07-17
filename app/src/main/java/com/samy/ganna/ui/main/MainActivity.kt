@@ -3,19 +3,23 @@ package com.samy.ganna.ui.main
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.samy.ganna.R
 import com.samy.ganna.databinding.ActivityMainBinding
 import com.samy.ganna.pojo.Book
@@ -75,42 +79,93 @@ class MainActivity : AppCompatActivity() {
 
     private fun makeNotificationDaily() {
         myLog("makeNotificationDaily")
-        sendRunTimePermission()
+        if (areNotificationsEnabled()) {
+            sendRunTimePermission()
+        } else {
+            showNotificationDisabledDialog()
+        }
+    }
+
+    private fun areNotificationsEnabled(): Boolean {
+        return NotificationManagerCompat.from(this).areNotificationsEnabled()
     }
 
     private fun sendRunTimePermission() {
         myLog("sendRunTimePermission")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-            } else {
-                // Permission already granted, show the notification
-                scheduleNotification()
-            }
+        if (Build.VERSION.SDK_INT >= 33) {
+            requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
         } else {
-            // Android version is lower than 13, no need to request permission
-        scheduleNotification()
+            hasNotificationPermissionGranted = true
+            scheduleNotification()
         }
     }
 
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        myLog("registerForActivityResult")
-        myLog("isGranted: $isGranted")
+    var hasNotificationPermissionGranted = false
+
+    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+        hasNotificationPermissionGranted = isGranted
         if (isGranted) {
             scheduleNotification()
-            Toast.makeText(this, "Notifications permission granted", Toast.LENGTH_SHORT)
-                .show()
+            Toast.makeText(applicationContext, "Notification permission granted", Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(this, "Notification permission denied", Toast.LENGTH_SHORT).show()
+            handlePermissionDenied()
         }
     }
 
+    private fun handlePermissionDenied() {
+        myLog("handlePermissionDenied")
+        myLog("Build.VERSION.SDK_INT: ${Build.VERSION.SDK_INT >= 33}")
+        myLog("shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS: ${shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS)}")
+        myLog("Build.VERSION.SDK_INT >= 33 && shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS)): ${Build.VERSION.SDK_INT >= 33 && shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS)}")
+        if (Build.VERSION.SDK_INT >= 33 && shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS)) {
+            showNotificationPermissionRationale()
+        } else {
+            showSettingDialog()
+        }
+    }
+
+    private fun showNotificationPermissionRationale() {
+        MaterialAlertDialogBuilder(this, com.google.android.material.R.style.MaterialAlertDialog_Material3)
+            .setTitle("Alert")
+            .setMessage("Notification permission is required to show notifications.")
+            .setPositiveButton("Ok") { _, _ ->
+                if (Build.VERSION.SDK_INT >= 33) {
+                    requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun showSettingDialog() {
+        myLog("showSettingDialog")
+        MaterialAlertDialogBuilder(this, com.google.android.material.R.style.MaterialAlertDialog_Material3)
+            .setTitle("Notification Permission")
+            .setMessage("Notification permission is required. Please allow notification permission from settings.")
+            .setPositiveButton("Ok") { _, _ ->
+                val intent = Intent(ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    data = Uri.parse("package:$packageName")
+                }
+                startActivity(intent)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+
+    private fun showNotificationDisabledDialog() {
+        MaterialAlertDialogBuilder(this, com.google.android.material.R.style.MaterialAlertDialog_Material3)
+            .setTitle("Notifications Disabled")
+            .setMessage("Notifications are disabled for this app. Please enable notifications from settings.")
+            .setPositiveButton("Go to Settings") { _, _ ->
+                val intent = Intent(ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    data = Uri.parse("package:$packageName")
+                }
+                startActivity(intent)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
     private fun scheduleNotification() {
         myLog("scheduleNotification")
         val old = getSharedPreferencesBoolean(

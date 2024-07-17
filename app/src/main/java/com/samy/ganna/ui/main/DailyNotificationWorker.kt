@@ -42,7 +42,7 @@ class DailyNotificationWorker(val context: Context, params: WorkerParameters) :
     companion object {
         fun scheduleNextNotification(context: Context) {
             val notificationWork: PeriodicWorkRequest =
-                PeriodicWorkRequestBuilder<DailyNotificationWorker>(1, TimeUnit.HOURS)// todo 6
+                PeriodicWorkRequestBuilder<DailyNotificationWorker>(6, TimeUnit.HOURS)
              .build()
 
             WorkManager.getInstance(context).enqueue(notificationWork)
