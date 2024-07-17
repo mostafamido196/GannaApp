@@ -39,6 +39,13 @@ import com.samy.ganna.utils.Utils.setSharedPreferencesInt
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
+import com.google.android.play.core.appupdate.AppUpdateInfo
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.appupdate.AppUpdateOptions
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.UpdateAvailability
+import com.google.android.play.core.tasks.Task
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -65,11 +72,14 @@ class MainActivity : AppCompatActivity() {
         data()
         onViewPageCallBack()
         onclick()
-        makeNotificationDaily()
         observe()
 
     }
 
+    override fun onStart() {
+        super.onStart()
+        makeNotificationDaily()
+    }
     private fun showNotificationItem() {
         closeDrawer()
         val itemCLicked = intent.getIntExtra(Constants.ISAUTOOPENDNOTIFICATION, -1)
