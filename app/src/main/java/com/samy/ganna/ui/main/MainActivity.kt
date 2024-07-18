@@ -166,11 +166,11 @@ class MainActivity : AppCompatActivity() {
         myLog("scheduleNotification")
         myLog("areNotificationsEnabled: ${areNotificationsEnabled()}")
         myLog("makeScheduler before: ${ifWillMakeScheduler()}")
-        if (areNotificationsEnabled() && !ifWillMakeScheduler()) {
-            // if the user edit notification sitting after download
-            WorkManager.getInstance(this).cancelAllWork()
-            setMakeScheduler(true)
-        }
+//        if (areNotificationsEnabled() && !ifWillMakeScheduler()) {
+//            // if the user edit notification sitting after download
+//            WorkManager.getInstance(this).cancelAllWork()
+//            setMakeScheduler(true)
+//        }
         myLog("makeScheduler after: ${ifWillMakeScheduler()}")
         if (ifWillMakeScheduler()) {
             DailyNotificationWorker.scheduleNextNotification(this)
