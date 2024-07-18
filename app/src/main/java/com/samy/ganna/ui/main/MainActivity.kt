@@ -1,25 +1,21 @@
 package com.samy.ganna.ui.main
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import androidx.work.WorkManager
 import com.samy.ganna.R
 import com.samy.ganna.databinding.ActivityMainBinding
 import com.samy.ganna.pojo.Book
@@ -27,25 +23,14 @@ import com.samy.ganna.pojo.Title
 import com.samy.ganna.ui.main.adapter.PageAdapter
 import com.samy.ganna.ui.main.adapter.TitleAdapter
 import com.samy.ganna.utils.Constants
-import com.samy.ganna.utils.Constants.NOTIFICATION_PERMISSION_REQUEST_CODE
 import com.samy.ganna.utils.NetworkState
-import com.samy.ganna.utils.NotificationUtils
 import com.samy.ganna.utils.Utils
 import com.samy.ganna.utils.Utils.getSharedPreferencesBoolean
-import com.samy.ganna.utils.Utils.getSharedPreferencesInt
 import com.samy.ganna.utils.Utils.myLog
 import com.samy.ganna.utils.Utils.setSharedPreferencesBoolean
-import com.samy.ganna.utils.Utils.setSharedPreferencesInt
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-import com.google.android.play.core.appupdate.AppUpdateInfo
-import com.google.android.play.core.appupdate.AppUpdateManager
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory
-import com.google.android.play.core.appupdate.AppUpdateOptions
-import com.google.android.play.core.install.model.AppUpdateType
-import com.google.android.play.core.install.model.UpdateAvailability
-import com.google.android.play.core.tasks.Task
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -73,13 +58,15 @@ class MainActivity : AppCompatActivity() {
         onViewPageCallBack()
         onclick()
         observe()
-
-    }
-
-    override fun onStart() {
-        super.onStart()
         makeNotificationDaily()
+        prepareGooglePlayNewVersion()
     }
+
+    private fun prepareGooglePlayNewVersion() {
+
+    }
+
+
     private fun showNotificationItem() {
         closeDrawer()
         val itemCLicked = intent.getIntExtra(Constants.ISAUTOOPENDNOTIFICATION, -1)
@@ -89,10 +76,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun makeNotificationDaily() {
         myLog("makeNotificationDaily")
+        myLog("areNotificationsEnabled: ${areNotificationsEnabled()}")
         if (areNotificationsEnabled()) {
-            sendRunTimePermission()
+            scheduleNotification()
         } else {
-            showNotificationDisabledDialog()
+            sendRunTimePermission()
         }
     }
 
@@ -102,93 +90,112 @@ class MainActivity : AppCompatActivity() {
 
     private fun sendRunTimePermission() {
         myLog("sendRunTimePermission")
+        myLog("Build.VERSION.SDK_INT: ${Build.VERSION.SDK_INT}")
         if (Build.VERSION.SDK_INT >= 33) {
             requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
         } else {
-            hasNotificationPermissionGranted = true
-            scheduleNotification()
+            showCustomNotificationDisabledDialog()
         }
     }
 
-    var hasNotificationPermissionGranted = false
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            myLog("registerForActivityResult")
+            myLog("isGranted: ${isGranted}")
+            callBackPermissionAction(isGranted)
+        }
 
-    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-        hasNotificationPermissionGranted = isGranted
+    private fun callBackPermissionAction(isGranted: Boolean) {
+        myLog("callBackPermissionAction")
+        myLog("isGranted: $isGranted")
         if (isGranted) {
+            // Permission is granted. Continue with showing notifications.
+            Toast.makeText(applicationContext, "تم تفعيل الأشعارات بنجاح", Toast.LENGTH_SHORT)
+                .show()
             scheduleNotification()
-            Toast.makeText(applicationContext, "Notification permission granted", Toast.LENGTH_SHORT).show()
         } else {
-            handlePermissionDenied()
+            Toast.makeText(applicationContext, "لم يتم تفعيل الأشعارات", Toast.LENGTH_SHORT)
+                .show()
+            // Explain to the user that the feature is unavailable because the
+            // features requires a permission that the user has denied.
         }
     }
 
-    private fun handlePermissionDenied() {
-        myLog("handlePermissionDenied")
-        myLog("Build.VERSION.SDK_INT: ${Build.VERSION.SDK_INT >= 33}")
-        myLog("shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS: ${shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS)}")
-        myLog("Build.VERSION.SDK_INT >= 33 && shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS)): ${Build.VERSION.SDK_INT >= 33 && shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS)}")
-        if (Build.VERSION.SDK_INT >= 33 && shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS)) {
-            showNotificationPermissionRationale()
-        } else {
-            showSettingDialog()
+    companion object {
+        val REQUEST_CODE_SETTINGS = 45
+    }
+
+    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        myLog("onActivityResult")
+        myLog("areNotificationsEnabled: ${areNotificationsEnabled()}")
+        myLog("requestCode: ${requestCode}")
+        myLog("REQUEST_CODE_SETTINGS: ${REQUEST_CODE_SETTINGS}")
+//        if (data.getIntExtra(REQUEST_CODE_SETTINGS) == REQUEST_CODE_SETTINGS) {
+        callBackPermissionAction(areNotificationsEnabled())
+//        }
+    }
+
+
+    private val dialogHandler = Handler(Looper.getMainLooper())
+    private val dialogRunnable = Runnable {
+        val dialog = CenterDialogFragment()
+        dialog.show(supportFragmentManager, "TopDialog")
+    }
+    private val hideDialogRunnable = Runnable {
+        supportFragmentManager.findFragmentByTag("TopDialog")?.let {
+            (it as CenterDialogFragment).dismiss()
         }
     }
 
-    private fun showNotificationPermissionRationale() {
-        MaterialAlertDialogBuilder(this, com.google.android.material.R.style.MaterialAlertDialog_Material3)
-            .setTitle("Alert")
-            .setMessage("Notification permission is required to show notifications.")
-            .setPositiveButton("Ok") { _, _ ->
-                if (Build.VERSION.SDK_INT >= 33) {
-                    requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-                }
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
+    private fun showCustomNotificationDisabledDialog() {
+        myLog("showCustomNotificationDialog")  // Show the dialog immediately
+        dialogHandler.post(dialogRunnable)
+        // Hide the dialog after 10 sec
+        dialogHandler.postDelayed(hideDialogRunnable, 10 * 1000) // 10 sec
     }
 
-    private fun showSettingDialog() {
-        myLog("showSettingDialog")
-        MaterialAlertDialogBuilder(this, com.google.android.material.R.style.MaterialAlertDialog_Material3)
-            .setTitle("Notification Permission")
-            .setMessage("Notification permission is required. Please allow notification permission from settings.")
-            .setPositiveButton("Ok") { _, _ ->
-                val intent = Intent(ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                    data = Uri.parse("package:$packageName")
-                }
-                startActivity(intent)
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
+    override fun onDestroy() {
+        super.onDestroy()
+//        In onDestroy, the callbacks are removed to avoid memory leaks.
+        dialogHandler.removeCallbacks(dialogRunnable)
+        dialogHandler.removeCallbacks(hideDialogRunnable)
     }
 
-
-    private fun showNotificationDisabledDialog() {
-        MaterialAlertDialogBuilder(this, com.google.android.material.R.style.MaterialAlertDialog_Material3)
-            .setTitle("Notifications Disabled")
-            .setMessage("Notifications are disabled for this app. Please enable notifications from settings.")
-            .setPositiveButton("Go to Settings") { _, _ ->
-                val intent = Intent(ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                    data = Uri.parse("package:$packageName")
-                }
-                startActivity(intent)
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
     private fun scheduleNotification() {
         myLog("scheduleNotification")
-        val old = getSharedPreferencesBoolean(
+        myLog("areNotificationsEnabled: ${areNotificationsEnabled()}")
+        myLog("makeScheduler before: ${ifWillMakeScheduler()}")
+        if (areNotificationsEnabled() && !ifWillMakeScheduler()) {
+            // if the user edit notification sitting after download
+            WorkManager.getInstance(this).cancelAllWork()
+            setMakeScheduler(true)
+        }
+        myLog("makeScheduler after: ${ifWillMakeScheduler()}")
+        if (ifWillMakeScheduler()) {
+            DailyNotificationWorker.scheduleNextNotification(this)
+            setMakeScheduler(false)
+        }
+    }
+
+
+
+    private fun ifWillMakeScheduler(): Boolean {
+        return getSharedPreferencesBoolean(
             this,
             Constants.ScheduleTask,
-            Constants.IsInitialised,
-            false
+            Constants.IsNotSchedule,
+            true
         )
-        myLog("old: $old")
-        if (!old) {
-            DailyNotificationWorker.scheduleNextNotification(this)
-            setSharedPreferencesBoolean(this, Constants.ScheduleTask, Constants.IsInitialised, true)
-        }
+    }
+
+    private fun setMakeScheduler(b: Boolean) {
+        setSharedPreferencesBoolean(
+            this,
+            Constants.ScheduleTask,
+            Constants.IsNotSchedule,
+            b
+        )
     }
 
 
@@ -411,35 +418,6 @@ class MainActivity : AppCompatActivity() {
 //        myLog("MainActivity:ifAppOpenedFromNotification: getIntExstraFromNotifiacation:${getIntExstraFromNotifiacation} ")
         return getIntExstraFromNotifiacation != -1
     }
-
-    // orientation
-//    override fun onSaveInstanceState(outState: Bundle) {
-//        super.onSaveInstanceState(outState)
-//        outState.putInt("current_page", binding.viewpager.currentItem)
-//    }
-//
-//    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-//        super.onRestoreInstanceState(savedInstanceState)
-//        val currentPage = savedInstanceState.getInt("current_page", 0)
-//        binding.viewpager.post {
-//            binding.viewpager.setCurrentItem(currentPage, false)
-//        }
-//    }
-
-
-//    var indexOfCurrentPage: Int = 0 //when the phone power off then power on
-//    override fun onResume() {
-//        super.onResume()
-//        binding.viewpager.currentItem =
-//            indexOfCurrentPage //when the phone power off then power on
-//
-//    }
-//
-//    override fun onPause() {
-//        super.onPause()
-//        indexOfCurrentPage =
-//            binding.viewpager.currentItem //when the phone power off then power on
-//    }
 
 
     private fun closeDrawer() {

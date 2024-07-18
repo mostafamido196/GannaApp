@@ -1,7 +1,6 @@
 package com.samy.ganna.utils
 
 import android.Manifest
-import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -16,11 +15,10 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.samy.ganna.R
 import com.samy.ganna.data.BookServices
-import com.samy.ganna.ui.main.MainActivity
 import com.samy.ganna.ui.splashscreen.SplashScreenActivity
 import com.samy.ganna.utils.Utils.myLog
+import com.samy.ganna.utils.Utils.myTry
 import com.samy.ganna.utils.Utils.replaceArabicNumbers
-import com.samy.ganna.utils.Utils.setSharedPreferencesInt
 import java.util.Calendar
 
 object NotificationUtils {
@@ -41,13 +39,13 @@ object NotificationUtils {
 
     private fun createNotification(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, importance).apply {
                 description = "descriptionText"
             }
             // Register the channel with the system.
             val notificationManager: NotificationManager =
-                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                context.getSystemService(NotificationManager::class.java) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
     }
@@ -59,11 +57,15 @@ object NotificationUtils {
         val intent = Intent(context, SplashScreenActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             putExtra(EXTRA_NOTIFICATION, page.first)
-//            setSharedPreferencesInt(context,Constants.NOTIFICATION,Constants.ONCLICK_NOTIFICATION_ID,page.first)
             myLog("NotificationUtils:handleNotification:Intent:page.first: ${page.first} ")
         }
         val pendingIntent: PendingIntent =
-            PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            PendingIntent.getActivity(
+                context,
+                NOTIFICATION_PERMISSION_REQUEST_CODE,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+            )
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.tree)
@@ -75,13 +77,14 @@ object NotificationUtils {
     }
 
     private fun showNotification(context: Context, builder: NotificationCompat.Builder) {
+        myLog("showNotification")
         with(NotificationManagerCompat.from(context)) {
             if (ActivityCompat.checkSelfPermission(
                     context,
                     Manifest.permission.POST_NOTIFICATIONS
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                // TODO: Consider calling
+                myLog("if")
                 // ActivityCompat#requestPermissions
                 // here to request the missing permissions, and then overriding
                 // public fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>,
@@ -106,12 +109,18 @@ object NotificationUtils {
         contentView.setTextViewText(R.id.textMessage, getPageTitle)
         contentView.setTextViewText(
             R.id.time,
-            "${
-                (Calendar.getInstance()[Calendar.HOUR_OF_DAY] % 12).toString()
-                    .replaceArabicNumbers()
-            }:${(Calendar.getInstance()[Calendar.MINUTE]).toString().replaceArabicNumbers()}"
+            "${getCurrentHour().toString().replaceArabicNumbers()}" +
+                    ":${
+                        (Calendar.getInstance()[Calendar.MINUTE]).toString().replaceArabicNumbers()
+                    }"
         )
         return contentView
+    }
+
+    private fun getCurrentHour(): Int {
+        var hours = (Calendar.getInstance()[Calendar.HOUR_OF_DAY] % 12)
+        if (hours == 0) hours = 12
+        return hours
     }
 
     private fun getTitlePage(context: Context): Pair<Int, String> {
@@ -124,10 +133,10 @@ object NotificationUtils {
             num = 1
         }
         var title = BookServices().getBook().arr[num + 1].title
-        if (title[title.length-1] == '.')
-            title = title.substring(0,title.length-1)
-        if (title[title.length-1] == ' ')
-            title = title.substring(0,title.length-1)
+        if (title[title.length - 1] == '.')
+            title = title.substring(0, title.length - 1)
+        if (title[title.length - 1] == ' ')
+            title = title.substring(0, title.length - 1)
 
         if (title[2] == '-') {
             title = title.substring(3, title.length)

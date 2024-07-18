@@ -17,7 +17,7 @@ object Constants {
      const val DATA = "Data"
      const val BUILDNOTIFICATION = "BuildNotification"
      const val ScheduleTask = "ScheduleTask"
-     const val IsInitialised = "IsInitialised"
+     const val IsNotSchedule = "IsNotSchedule"
      const val NOTIFICATION = "NOTIFICATION"
      const val ONCLICK_NOTIFICATION_ID = "ONCLICK_NOTIFICATION_ID"
      const val NOTIFICATION_PERMISSION_REQUEST_CODE = 111

@@ -1,34 +1,64 @@
-<?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<?xml version="1.0" encoding="utf-8"?><!-- notification_custom_layout.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layoutDirection="rtl"
+    android:orientation="horizontal">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <ImageView
+        android:id="@+id/iv"
+        android:layout_width="@dimen/_46sdp"
+        android:layout_height="@dimen/_46sdp"
+        android:src="@drawable/img_notify"
+        app:civ_border_color="@color/c4_actionbar"
+        app:civ_border_width="@dimen/_1sdp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/c2_read"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-
-
+        android:layout_marginTop="@dimen/_4sdp"
+        android:layout_height="wrap_content">
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_marginTop="@dimen/_4sdp"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/textTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="@dimen/_4sdp"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_gravity="bottom"
+            android:text="من أسباب دخول الجنة"
+            android:textColor="@color/c10_titleNotificationTextColor"
+            android:textSize="@dimen/_18ssp"
+            android:textStyle="bold"/>
 
         <TextView
-            android:id="@+id/tv_matn"
-            android:textSize="@dimen/_14ssp"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textColor="#0091EA"
-            android:layout_marginStart="@dimen/_6sdp"
-            android:layout_marginEnd="@dimen/_6sdp"
-            android:text="وليد الرفاعي"
-            android:textStyle="bold"
-            android:fontFamily="@font/aga_islamic_phrases"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:id="@+id/time"
+            android:textSize="@dimen/_10ssp"
+            android:textColor="@color/c7_special_author"
+            android:text="14:2"
+            android:layout_marginLeft="@dimen/_4sdp"
+            android:layout_gravity="left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
 
-
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-</layout>
+    <TextView
+        android:id="@+id/textMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/_4sdp"
+        android:layout_marginStart="@dimen/_16sdp"
+        android:text="إماطة الاذى عن الطريق"
+        android:layout_marginBottom="@dimen/_8sdp"
+        android:textColor="@color/c7_special_author"
+        android:textSize="@dimen/_10ssp" />
+</LinearLayout>
+</LinearLayout>

@@ -1,9 +1,10 @@
 package com.samy.ganna.ui.main
 
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
+import android.content.SharedPreferences
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
@@ -12,9 +13,9 @@ import androidx.work.WorkerParameters
 import com.samy.ganna.R
 import com.samy.ganna.utils.Constants
 import com.samy.ganna.utils.NotificationUtils
-import com.samy.ganna.utils.Utils.myLog
 import com.samy.ganna.utils.Utils.setSharedPreferencesString
 import java.util.Calendar
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 
@@ -47,7 +48,6 @@ class DailyNotificationWorker(val context: Context, params: WorkerParameters) :
 
             WorkManager.getInstance(context).enqueue(notificationWork)
         }
-
     }
 }
 
