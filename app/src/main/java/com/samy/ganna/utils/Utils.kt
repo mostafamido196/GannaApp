@@ -41,7 +41,7 @@ import kotlin.math.pow
 
 object Utils {
 
-    public fun String.replaceArabicNumbers(): String =
+     fun String.replaceArabicNumbers(): String =
         this.replace("1", "١").replace("2", "٢").replace("3", "٣").replace("4", "٤")
             .replace("5", "٥").replace("6", "٦").replace("7", "٧").replace("8", "٨")
             .replace("9", "٩").replace("0", "٠")
@@ -341,12 +341,12 @@ object Utils {
 
 //        snackbarView.setBackgroundColor(ContextCompat.getColor(mView.context, R.color.yellow_2))
 
-        val snackbarTextView =
-            snackbarView.findViewById(com.google.android.material.R.id.snackbar_text) as TextView
+//        val snackbarTextView =
+//            snackbarView.findViewById(com.google.android.material.R.id.snackbar_text) as TextView
 
 //        snackbarTextView.setTextColor(ContextCompat.getColor(mView.context, R.color.white))
 
-        snackbarTextView.text = txt
+//        snackbarTextView.text = txt
 
         snackbar.show()
 
