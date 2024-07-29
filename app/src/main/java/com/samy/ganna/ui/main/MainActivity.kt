@@ -15,7 +15,6 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
-import androidx.work.WorkManager
 import com.samy.ganna.R
 import com.samy.ganna.databinding.ActivityMainBinding
 import com.samy.ganna.pojo.Book
@@ -24,7 +23,6 @@ import com.samy.ganna.ui.main.adapter.PageAdapter
 import com.samy.ganna.ui.main.adapter.TitleAdapter
 import com.samy.ganna.utils.Constants
 import com.samy.ganna.utils.NetworkState
-import com.samy.ganna.utils.Utils
 import com.samy.ganna.utils.Utils.getSharedPreferencesBoolean
 import com.samy.ganna.utils.Utils.myLog
 import com.samy.ganna.utils.Utils.setSharedPreferencesBoolean
@@ -59,12 +57,10 @@ class MainActivity : AppCompatActivity() {
         onclick()
         observe()
         makeNotificationDaily()
-        prepareGooglePlayNewVersion()
-    }
-
-    private fun prepareGooglePlayNewVersion() {
+//        prepareGooglePlayNewVersion()
 
     }
+
 
 
     private fun showNotificationItem() {
@@ -131,7 +127,7 @@ class MainActivity : AppCompatActivity() {
         myLog("areNotificationsEnabled: ${areNotificationsEnabled()}")
         myLog("requestCode: ${requestCode}")
         myLog("REQUEST_CODE_SETTINGS: ${REQUEST_CODE_SETTINGS}")
-//        if (data.getIntExtra(REQUEST_CODE_SETTINGS) == REQUEST_CODE_SETTINGS) {
+//        if (requestCode == REQUEST_CODE_SETTINGS) {
         callBackPermissionAction(areNotificationsEnabled())
 //        }
     }
@@ -165,19 +161,12 @@ class MainActivity : AppCompatActivity() {
     private fun scheduleNotification() {
         myLog("scheduleNotification")
         myLog("areNotificationsEnabled: ${areNotificationsEnabled()}")
-        myLog("makeScheduler before: ${ifWillMakeScheduler()}")
-//        if (areNotificationsEnabled() && !ifWillMakeScheduler()) {
-//            // if the user edit notification sitting after download
-//            WorkManager.getInstance(this).cancelAllWork()
-//            setMakeScheduler(true)
-//        }
-        myLog("makeScheduler after: ${ifWillMakeScheduler()}")
+        myLog("makeScheduler: ${ifWillMakeScheduler()}")
         if (ifWillMakeScheduler()) {
             DailyNotificationWorker.scheduleNextNotification(this)
             setMakeScheduler(false)
         }
     }
-
 
 
     private fun ifWillMakeScheduler(): Boolean {

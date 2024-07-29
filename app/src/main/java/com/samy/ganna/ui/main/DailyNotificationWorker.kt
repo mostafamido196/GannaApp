@@ -25,12 +25,12 @@ class DailyNotificationWorker(val context: Context, params: WorkerParameters) :
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun doWork(): Result {
-        setSharedPreferencesString(
-            context,
-            Constants.TEST,
-            Constants.WORKER,
-            "doWork(): month:${Calendar.getInstance()[Calendar.MONTH]}/day:${Calendar.getInstance()[Calendar.DAY_OF_MONTH]}--> hour:${Calendar.getInstance()[Calendar.HOUR_OF_DAY]}/min:${Calendar.getInstance()[Calendar.MINUTE]}/millisecond:${Calendar.getInstance()[Calendar.MILLISECOND]}"
-        )
+//        setSharedPreferencesString(
+//            context,
+//            Constants.TEST,
+//            Constants.WORKER,
+//            "doWork(): month:${Calendar.getInstance()[Calendar.MONTH]}/day:${Calendar.getInstance()[Calendar.DAY_OF_MONTH]}--> hour:${Calendar.getInstance()[Calendar.HOUR_OF_DAY]}/min:${Calendar.getInstance()[Calendar.MINUTE]}/millisecond:${Calendar.getInstance()[Calendar.MILLISECOND]}"
+//        )
 //        myLog("DailyNotificationWorker:doWork()")
 //        myLog("hour:$${Calendar.getInstance()[Calendar.HOUR_OF_DAY]}, min:$${Calendar.getInstance()[Calendar.MINUTE]}")
 //        myLog("-------------------------------------------")

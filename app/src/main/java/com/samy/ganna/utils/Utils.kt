@@ -64,11 +64,11 @@ object Utils {
     }
 
 
-    public fun myTry(tag: String, myFun: () -> Unit) {
+    public fun myTry( myFun: () -> Unit) {
         try {
             myFun()
         } catch (e: Exception) {
-            Log.d(tag, "e ${e.message.toString()}")
+            Log.d("hamoly", "e ${e.message.toString()}")
 
         }
     }
