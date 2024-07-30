@@ -63,6 +63,7 @@
                     android:id="@+id/tv_matn"
                     android:textSize="@dimen/_14ssp"
                     android:layout_width="0dp"
+                    android:lineSpacingExtra="@dimen/_2sdp"
                     android:layout_height="wrap_content"
                     android:textColor="@color/c9_mainTextColor"
                     android:layout_marginStart="@dimen/_6sdp"

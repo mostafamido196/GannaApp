@@ -25,6 +25,7 @@ import com.samy.ganna.utils.Constants
 import com.samy.ganna.utils.NetworkState
 import com.samy.ganna.utils.Utils.getSharedPreferencesBoolean
 import com.samy.ganna.utils.Utils.myLog
+import com.samy.ganna.utils.Utils.myTry
 import com.samy.ganna.utils.Utils.setSharedPreferencesBoolean
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -57,12 +58,53 @@ class MainActivity : AppCompatActivity() {
         onclick()
         observe()
         makeNotificationDaily()
-//        prepareGooglePlayNewVersion()
-
+//        myTry {
+//            checkForAppUpdate()
+//        }
     }
 
+   /*
+   private val UPDATE_REQUEST_CODE = 100
+    private fun checkForAppUpdate() {
+        myLog("checkForAppUpdate")
+        val appUpdateManager = AppUpdateManagerFactory.create(this)
 
+        // Returns an intent object that you use to check for an update.
+        val appUpdateInfoTask: Task<AppUpdateInfo> = appUpdateManager.appUpdateInfo
+        myLog("UpdateAvailability.UPDATE_AVAILABLE: ${UpdateAvailability.UPDATE_AVAILABLE}")
+        // Checks whether an update is available.
+        appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
+            myLog("appUpdateInfo.updateAvailability(): ${appUpdateInfo.updateAvailability()}")
+            myLog("UpdateAvailability.UPDATE_AVAILABLE: ${UpdateAvailability.UPDATE_AVAILABLE}")
+            myLog(
+                "appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE): ${
+                    appUpdateInfo.isUpdateTypeAllowed(
+                        AppUpdateType.IMMEDIATE
+                    )
+                }"
+            )
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+                && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
+            ) {
+                // Request the update.
+                appUpdateManager.startUpdateFlowForResult(
+                    appUpdateInfo,
+                    AppUpdateType.IMMEDIATE,
+                    this,
+                    UPDATE_REQUEST_CODE
+                )
+            }
+        }.addOnFailureListener { exception ->
+            myLog( "Failed to check for update")
+            myLog( "exception: $exception")
+            *//*
+            exception: com.google.android.play.core.install.InstallException: Install Error(-10): The app is not owned by any user on this device. An app is "owned" if it has been acquired from Play. (https://developer.android.com/reference/com/google/android/play/core/install/model/InstallErrorCode#ERROR_APP_NOT_OWNED)
 
+             *//*
+        }
+    }
+
+*/
     private fun showNotificationItem() {
         closeDrawer()
         val itemCLicked = intent.getIntExtra(Constants.ISAUTOOPENDNOTIFICATION, -1)
@@ -129,6 +171,9 @@ class MainActivity : AppCompatActivity() {
         myLog("REQUEST_CODE_SETTINGS: ${REQUEST_CODE_SETTINGS}")
 //        if (requestCode == REQUEST_CODE_SETTINGS) {
         callBackPermissionAction(areNotificationsEnabled())
+//        }else if(resultCode == UPDATE_REQUEST_CODE){
+//             //Handle the error case
+//             //For example, you can show a message to the user
 //        }
     }
 
