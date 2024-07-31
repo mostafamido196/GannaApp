@@ -286,7 +286,7 @@ class MainActivity : AppCompatActivity() {
 //                myLog("binding.title.setOnClickListener")
 //                NotificationUtils.generateNotification(this, "testMainActivity")
 //
-//
+//k
 //            }
 //        }
 

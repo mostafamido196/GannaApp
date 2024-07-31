@@ -70,7 +70,7 @@ object NotificationUtils {
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.tree)
             .setCustomContentView(prepareCustomView(context, s, page.second))
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
         return builder
