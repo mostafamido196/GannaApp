@@ -13,7 +13,6 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.bumptech.glide.Glide
 import com.samy.ganna.R
 import com.samy.ganna.data.BookServices
 import com.samy.ganna.ui.splashscreen.SplashScreenActivity
@@ -21,7 +20,7 @@ import com.samy.ganna.utils.Utils.myLog
 import com.samy.ganna.utils.Utils.replaceArabicNumbers
 import java.util.Calendar
 
-object NotificationUtils {
+object CustomNotificationUtils {
     private const val CHANNEL_ID = "daily_notification_channel"
     private const val CHANNEL_NAME = "Advice"
     private const val NOTIFICATION_ID = 500
@@ -69,29 +68,11 @@ object NotificationUtils {
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.tree)
-            .setContentTitle(s)
-            .setContentText(page.second)
+            .setCustomContentView(prepareCustomView(context, s, page.second))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
-
-
-        setLargeIcon(builder,context)
-
         return builder
-    }
-
-    private fun setLargeIcon(builder: NotificationCompat.Builder, context: Context) {
-        val futureTarget = Glide.with(context)
-            .asBitmap()
-            .load(R.drawable.img_notify)
-            .submit()
-
-        val bitmap = futureTarget.get()
-        builder.setLargeIcon(bitmap)
-
-        Glide.with(context).clear(futureTarget)
-
     }
 
     private fun showNotification(context: Context, builder: NotificationCompat.Builder) {
@@ -119,7 +100,27 @@ object NotificationUtils {
 
     }
 
+    private fun prepareCustomView(context: Context, s: String, getPageTitle: String): RemoteViews? {
 
+        val contentView =
+            RemoteViews(context.packageName, R.layout.notification_custom_layout) as RemoteViews
+        contentView.setTextViewText(R.id.textTitle, s)
+        contentView.setTextViewText(R.id.textMessage, getPageTitle)
+        contentView.setTextViewText(
+            R.id.time,
+            "${getCurrentHour().toString().replaceArabicNumbers()}" +
+                    ":${
+                        (Calendar.getInstance()[Calendar.MINUTE]).toString().replaceArabicNumbers()
+                    }"
+        )
+        return contentView
+    }
+
+    private fun getCurrentHour(): Int {
+        var hours = (Calendar.getInstance()[Calendar.HOUR_OF_DAY] % 12)
+        if (hours == 0) hours = 12
+        return hours
+    }
 
     private fun getTitlePage(context: Context): Pair<Int, String> {
 

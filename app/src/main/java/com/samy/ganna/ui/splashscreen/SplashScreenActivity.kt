@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.samy.ganna.R
 import com.samy.ganna.ui.main.MainActivity
 import com.samy.ganna.utils.Constants
-import com.samy.ganna.utils.NotificationUtils
+import com.samy.ganna.utils.CustomNotificationUtils
 import com.samy.ganna.utils.Utils.myLog
 
 class SplashScreenActivity : AppCompatActivity() {
@@ -16,7 +16,7 @@ class SplashScreenActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash_screen)
 
-        isOpenFromNotification = intent.getIntExtra(NotificationUtils.EXTRA_NOTIFICATION, -1)
+        isOpenFromNotification = intent.getIntExtra(CustomNotificationUtils.EXTRA_NOTIFICATION, -1)
         myLog("-----------------------------------------------------------")
         myLog("Splashscreen: isOpenFromNotification: $isOpenFromNotification")
         Handler().postDelayed({
