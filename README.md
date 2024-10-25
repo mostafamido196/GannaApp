@@ -1,6 +1,8 @@
 # Ganna App
 
-Ganna App is a Android application that displays sammary book with a beautiful and user-friendly interface. The app features notifications that remind users of reasonse of ganna at specific times. ## Features
+Ganna App is a Android application that displays sammary book with a beautiful and user-friendly interface. The app features notifications that remind users of reasonse of ganna at specific times.
+
+## Features
 
 - **Local Notifications**: Manage notifications even when the app is not open using Flutter local notifications.
 - **View Pager**: Smooth page navigation for an enhanced user experience.
